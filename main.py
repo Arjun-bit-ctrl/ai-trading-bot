@@ -4,9 +4,11 @@ import time
 from datetime import datetime, timedelta
 import requests
 import os
+import threading
+from flask import Flask
 
 # ==============================
-# 🔑 CONFIG (SECURE)
+# 🔑 CONFIG (ENV VARIABLES)
 # ==============================
 
 API_KEY = os.getenv("API_KEY")
@@ -55,7 +57,7 @@ def calculate_rsi(df, period=14):
     return rsi
 
 # ==============================
-# 🌍 GLOBAL SENTIMENT (BASIC)
+# 🌍 GLOBAL SENTIMENT
 # ==============================
 
 def get_global_sentiment():
@@ -98,7 +100,7 @@ def analyze_index(symbol, token):
         trend_1h = "UP" if df["close"].iloc[-1] > df["close"].iloc[-12] else "DOWN"
 
         # ==============================
-        # 🎯 SCORING SYSTEM
+        # 🎯 SCORING
         # ==============================
 
         score = 0
@@ -152,7 +154,7 @@ def analyze_index(symbol, token):
         return None
 
 # ==============================
-# 🚀 MAIN LOOP
+# 🚀 BOT LOOP
 # ==============================
 
 def run_bot():
@@ -181,8 +183,23 @@ def run_bot():
         time.sleep(60)
 
 # ==============================
+# 🌐 FLASK SERVER (FOR FREE HOSTING)
+# ==============================
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "AI Bot Running"
+
+def start_bot():
+    run_bot()
+
+# ==============================
 # ▶️ START
 # ==============================
 
 if __name__ == "__main__":
-    run_bot()
+    t = threading.Thread(target=start_bot)
+    t.start()
+    app.run(host="0.0.0.0", port=10000)
